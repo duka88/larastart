@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row mt-5">
           <div class="col-12">
-            <div class="card">
+            <div class="card" v-if="$gate.isAuth()" >
               <div class="card-header">
                 <h3 class="card-title">Users Table</h3>
                 <div class="card-tools">
@@ -27,7 +27,7 @@
                     <td>{{user.email}}</td>
                     <td>{{user.type | upText}}</td>
                     <td>{{user.created_at }}</td>
-                    <td>
+                    <td v-if="$gate.idUser() === user.id">
                         <a href="#" @click="editModal(user)">
                             <i class="fa fa-edit text-blue"></i>
                         </a>
@@ -98,6 +98,7 @@
                 </div>
               </div>
             </div>
+
     </div>
 
 
@@ -203,6 +204,8 @@
             },
         },
         created() {
+          
+         
              this.loadUsers();
              Fire.$on('AfterCreate', () =>{
                 this.loadUsers();

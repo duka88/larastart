@@ -9,6 +9,10 @@ require('./bootstrap');
 
 window.Vue = require('vue');
 
+////////AuthUser////////////
+import Gate from "./Gate";
+Vue.prototype.$gate = new Gate(window.user);
+
 ////////EROR ALERT/////////////////
 import {Form , HasError, AlertError} from 'vform';
 import moment from 'moment';
@@ -78,6 +82,11 @@ Vue.component(
 Vue.component(
     'passport-personal-access-tokens',
     require('./components/passport/PersonalAccessTokens.vue').default
+);
+
+Vue.component(
+    'not-found',
+    require('./components/Not_Found.vue').default
 );
 /**
  * The following block of code may be used to automatically register your

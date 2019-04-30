@@ -10,7 +10,7 @@
                     <h5 class="widget-user-desc"></h5>
                 </div>
                 <div class="widget-user-image">
-                    <img class="img-circle"  alt="User Avatar">
+                    <img class="img-circle" :src="userPhoto()" alt="User Avatar">
                 </div>
                 <div class="card-footer">
                     <div class="row">
@@ -67,7 +67,8 @@
                                     <label for="inputName" class="col-sm-2 control-label">Name</label>
 
                                     <div class="col-sm-12">
-                                    <input type="" v-model="form.name" class="form-control" id="inputName" placeholder="Name">
+                                    <input type="" v-model="form.name" class="form-control" id="inputName" placeholder="Name":class="{'is-invalid': form.errors.has('name')}">
+                                    <has-error :form="form" field="name"></has-error>
                                     
                                     </div>
                                 </div>
@@ -75,8 +76,8 @@
                                     <label for="inputEmail" class="col-sm-2 control-label">Email</label>
 
                                     <div class="col-sm-12">
-                                    <input type="email"  class="form-control" id="inputEmail" placeholder="Email"  v-model="form.email">
-                                    
+                                    <input type="email"  class="form-control" id="inputEmail" placeholder="Email"  v-model="form.email":class="{'is-invalid': form.errors.has('email')}">
+                                       <has-error :form="form" field="email"></has-error>
                                     </div>
                                 </div>
 
@@ -91,29 +92,29 @@
                                 <div class="form-group">
                                     <label for="photo" class="col-sm-2 control-label">Profile Photo</label>
                                     <div class="col-sm-12">
-                                        <input type="file" name="photo" class="form-input">
+                                        <input type="file" @change="updateProfile" name="photo" class="form-input">
                                     </div>
 
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="password" class="col-sm-12 control-label">Passport (leave empty if not changing)</label>
+                                    <label for="password" class="col-sm-12 control-label">Password (leave empty if not changing)</label>
 
                                     <div class="col-sm-12">
                                     <input type="password"
                                        
                                         class="form-control"
                                         id="password"
-                                        placeholder="Passport"
-                                       
-                                    >
+                                       v-model="form.password"                                       
+                                       :class="{'is-invalid': form.errors.has('password')}">
+                                  <has-error :form="form" field="password"></has-error>
                                     
                                     </div>
                                 </div>
 
                                 <div class="form-group">
                                     <div class="col-sm-offset-2 col-sm-12">
-                                    <button  type="submit" class="btn btn-success">Update</button >   
+                                    <button @click.prevent="updateInfo" type="submit" class="btn btn-success">Update</button >   
                                     </div>
                                 </div>
                                 </form>
@@ -148,9 +149,49 @@
             })
             }
         } ,
+        methods: {
+            updateProfile(e){
+                let file = e.target.files[0];
+                let reader = new FileReader();
+     
+                if(file['size'] < 2097152){
+                    reader.onloadend = (file) => {
+                       this.form.photo =  reader.result;
+                    } 
+                    reader.readAsDataURL(file);
+                }else{
+                     swal.fire({
+                        type: 'error',
+                        title: 'Oops...',
+                        text: 'File size must be les then 2mb'
+                    });
+                }
+            },
+
+            updateInfo(){
+                this.$Progress.start();
+                this.form.put('api/profile')
+                    .then(()=>{
+                      Fire.$emit('AfterCreate');  
+                      this.$Progress.finish();
+                    })
+                    .catch(()=> {
+                     this.$Progress.fail();
+
+                    })
+            },
+            userPhoto(){
+                return "img/profile/" + this.form.photo;
+            }
+        },
         created() {
             axios.get('api/profile')
                  .then(({data}) => (this.form.fill(data)));
+            Fire.$on('AfterCreate', () =>{
+                 axios.get('api/profile')
+                 .then(({data}) => (this.form.fill(data)));
+             });     
+
         }
     }
 </script>
